@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react"
-import { Link } from "react-router"
+import LinkItem from "../linkItem/LinkItem"
 
 export default function FloatingBurgerMenu() {
   const [open, setOpen] = useState(false)
@@ -22,6 +22,13 @@ export default function FloatingBurgerMenu() {
     }
   }, [open])
 
+  const navLinks = [
+    { to: "/", label: "Home" },
+    { to: "/recipes", label: "Home" },
+    { to: "/aboutus", label: "Home" },
+    { to: "/login", label: "Home" },
+  ]
+
   return (
     <>
       <button
@@ -40,87 +47,16 @@ export default function FloatingBurgerMenu() {
             className="absolute inset-0 backdrop-blur-xs opacity-100 transition-opacity"
           />
           <div className="absolute inset-0 z-10 grid place-items-center p-6 pointer-events-none">
-            <nav className="pointer-events-auto w-full max-w-sm rounded-2xl bg-white shadow-xl ring-1 ring-black/10 p-6 transition duration-200 opacity-100 translate-y-0">
+            <nav className="pointer-events-auto w-full max-w-sm rounded-2xl bg-white shadow-xl ring-1 ring-black/10 p-6 transition duration-200 opacity-10 translate-y-0">
               <div className="flex justify-center w-full">
                 <img src="/Ico.svg" alt="" />
               </div>
               <ul className="space-y-2">
-                <li>
-                  <Link
-                    to="/"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center justify-between rounded-xl px-4 py-3 text-neutral-900 hover:bg-neutral-100">
-                    Home
-                    <span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/recipes"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center justify-between rounded-xl px-4 py-3 text-neutral-900 hover:bg-neutral-100">
-                    Rezepte
-                    <span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/aboutus"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center justify-between rounded-xl px-4 py-3 text-neutral-900 hover:bg-neutral-100">
-                    Über uns
-                    <span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </span>
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/login"
-                    onClick={() => setOpen(false)}
-                    className="flex items-center justify-between rounded-xl px-4 py-3 text-neutral-900 hover:bg-neutral-100">
-                    Login
-                    <span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
-                    </span>
-                  </Link>
-                </li>
+                {navLinks.map((link) => (
+                  <li key={link.label}>
+                    <LinkItem to={link.to} label={link.label} onClick={() => setOpen(false)} />
+                  </li>
+                ))}
               </ul>
             </nav>
           </div>

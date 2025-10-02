@@ -18,10 +18,7 @@ export default function MainProvider({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     const path = location.pathname
-    console.log("Aktueller Pfad:", path)
-    console.log("Params:", params)
 
-    // Home
     if (path === "/") {
       if (!state.cache.categoriesLoaded) {
         dispatch({ type: "FETCH_START" })
@@ -32,7 +29,6 @@ export default function MainProvider({ children }: { children: React.ReactNode }
       return
     }
 
-    // Kategorie-Liste
     if (path.startsWith("/recipes/category/") && params.categoryId) {
       dispatch({ type: "FETCH_START" })
       const category = state.categories.find((c) => c.id === params.categoryId)
@@ -48,7 +44,6 @@ export default function MainProvider({ children }: { children: React.ReactNode }
       return
     }
 
-    // Detailseite
     if (path.startsWith("/recipe/") && params.id) {
       const cached = state.cache.recipeDetail[params.id]
       if (cached) {
@@ -67,7 +62,6 @@ export default function MainProvider({ children }: { children: React.ReactNode }
       return
     }
 
-    // Alle Rezepte
     if (path === "/recipes") {
       dispatch({ type: "FETCH_START" })
       getAllRecipes()
