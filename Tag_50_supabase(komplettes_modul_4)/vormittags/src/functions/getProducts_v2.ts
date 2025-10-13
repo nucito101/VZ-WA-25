@@ -48,7 +48,6 @@ export async function getCart(): Promise<ICart> {
     console.error(error)
   }
 
-  console.log(cart)
   return cart as unknown as ICart
 }
 
@@ -62,6 +61,5 @@ export async function getCategory(): Promise<ICategory> {
   if (error) {
     console.error(error)
   }
-  console.log(category)
   return category as unknown as ICategory
 }
