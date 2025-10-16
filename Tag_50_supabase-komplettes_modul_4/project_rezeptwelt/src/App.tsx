@@ -8,6 +8,9 @@ import RecipeDetail from "./pages/recipeDetail/RecipeDetail"
 import RecipeList from "./pages/recipeList/RecipeList"
 import Recipe from "./pages/recipe/recipe"
 import CreateRecipePage from "./pages/createRecipePage/CreateRecipePage"
+import Login from "./pages/login/Login"
+import SignUp from "./pages/signUp/SignUp"
+import Profile from "./pages/profile/Profile"
 
 function App() {
   const router = createBrowserRouter(
@@ -26,6 +29,9 @@ function App() {
         <Route path="/recipe/:id" element={<RecipeDetail />} />
         <Route path="/recipe/new" element={<CreateRecipePage />} />
         <Route path="/aboutus" element={<AboutUs />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     )

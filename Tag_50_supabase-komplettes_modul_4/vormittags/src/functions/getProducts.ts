@@ -4,12 +4,18 @@ import supabase from "../utils/supabase"
 // SELECT * FROM products
 
 export async function getProdut_Store(): Promise<IProduct[]> {
-  const { data: products, error } = await supabase.from("products").select("*")
+  const { data: products, error } = await supabase.from("products").select(`
+    id,
+    title,
+    price,
+    quality,
+    category: categories(category_name)
+    `)
 
   if (error) {
     console.error(error)
   }
-  return products as IProduct[]
+  return products as unknown as IProduct[]
 }
 
 // ! selectQueries filter supabase Methoden

@@ -1,20 +1,51 @@
-import { createContext, useEffect, useReducer } from "react"
+import { createContext, useEffect, useReducer, useState } from "react"
 import { reducer } from "../function/reducer"
 import { initialState, type IState, type TAction } from "../interfaces/interface"
 import { useLocation, useParams } from "react-router"
 import { getAllRecipes, getCategories, getRecipesByCategory, getRecipeWithIngredients } from "../function/getRecipes"
+import type { User } from "@supabase/supabase-js"
+import supabase from "../utils/supabase"
 
 export interface MainContextProps {
   state: IState
   dispatch: React.Dispatch<TAction>
+  user: User | null
+  authChecked: boolean
+  linkRecipeToUser: (recipeId: string) => Promise<void>
 }
 
 export const mainContext = createContext<MainContextProps | null>(null)
 
 export default function MainProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState)
+  const [user, setUser] = useState<User | null>(null)
+  const [authChecked, setAuthChecked] = useState(false)
   const location = useLocation()
   const params = useParams()
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const { data, error } = await supabase.auth.getSession()
+      if (error) {
+        console.error("Fehler beim Abrufen der Session:", error.message)
+      }
+      setUser(data.session?.user ?? null)
+      setAuthChecked(true)
+    }
+    loadUser()
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => {
+      listener.subscription.unsubscribe()
+    }
+  }, [])
+
+  const linkRecipeToUser = async (recipeId: string) => {
+    if (!user) throw new Error("Nicht eingeloggt")
+    const { error } = await supabase.from("user_recipes").insert({ user_id: user.id, recipe_id: recipeId })
+    if (error) throw error
+  }
 
   useEffect(() => {
     const path = location.pathname
@@ -80,5 +111,9 @@ export default function MainProvider({ children }: { children: React.ReactNode }
     }
   }, [location.pathname, params])
 
-  return <mainContext.Provider value={{ state, dispatch }}>{children}</mainContext.Provider>
+  return (
+    <mainContext.Provider value={{ state, dispatch, user, authChecked, linkRecipeToUser }}>
+      {children}
+    </mainContext.Provider>
+  )
 }

@@ -25,7 +25,6 @@ export default function FloatingBurgerMenu() {
   const navLinks = [
     { to: "/", label: "Home" },
     { to: "/recipes", label: "Rezepte" },
-    { to: "/recipe/new", label: "Add Rezepte" },
     { to: "/aboutus", label: "Über uns" },
     { to: "/login", label: "Login" },
   ]

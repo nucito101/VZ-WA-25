@@ -1,5 +1,5 @@
 import type { ICart } from "../interfaces/ICart"
-import type { ICategory } from "../interfaces/Icategory"
+import type { ICategory } from "../interfaces/ICategory"
 import type { IProduct } from "../interfaces/IProduct"
 import supabase from "../utils/supabase"
 
@@ -26,7 +26,7 @@ export async function getProductANDCategory(): Promise<IProduct[]> {
   if (error) {
     console.error(error)
   }
-  return data as IProduct[]
+  return data as unknown as IProduct[]
 }
 
 // cart_items mit Produkten + Kategorien
