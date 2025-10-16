@@ -13,7 +13,7 @@ import { Alert } from "../../components/alert/Alert"
 import { ProfileHeader } from "../../components/profileheader/ProfileHeader"
 import { ProfileEditForm } from "../../components/profileEditForm/ProfileEditForm"
 import { StatCard } from "../../components/statCard/StatCard"
-import { RecipesGrid } from "../../components/recipesGrid/RecipesGrid"
+import { RecipesGrid } from "../../components/recipesGrid.tsx/RecipesGrid"
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true)

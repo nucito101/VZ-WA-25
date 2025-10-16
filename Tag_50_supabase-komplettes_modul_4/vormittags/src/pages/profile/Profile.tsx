@@ -3,6 +3,7 @@ import { Link } from "react-router"
 import { maincontext } from "../../context/MainProvider"
 import type { IUser } from "../../interfaces/IUser"
 import supabase from "../../utils/supabase"
+import { uploadPhoto } from "../../functions/UploadFoto"
 
 interface IProfileprops {
   user: IUser | null
@@ -13,6 +14,8 @@ export default function Profile() {
 
   const [isEditing, setIsEditing] = useState<boolean>(false)
   const [newUsername, setNewUserName] = useState<string>("")
+
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null)
 
   // fragt den aktuellen user aus der gespeicherten session im Browser ab gibt es eine gültige Session im LocalStorage
   // wenn ja dann gib mal die ID von dem User
@@ -63,11 +66,56 @@ export default function Profile() {
     }
   }
 
+  async function handleUploadPhoto() {
+    if (!profilePhoto || !user) return null
+
+    try {
+      const imgUrl = await uploadPhoto(profilePhoto)
+
+      if (imgUrl) {
+        setUser((prev) => (prev ? { ...prev, img_url: imgUrl } : prev))
+
+        await supabase.from("customers").update({ img_url: imgUrl }).eq("id", user.id)
+      }
+    } catch (error) {
+      console.error("Fehler beim Foto upload", error)
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-10">
       {user ? (
         <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 space-y-6">
           <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-gray-100">Your Profile</h2>
+
+          <div className="flex flex-col items-center space-y-3">
+            <img
+              src={user.img_url}
+              alt="Profile"
+              className="w-32 h-32 rounded-full object-cover border-4 border-gray-300 dark:border-gray-600 shadow-md"
+            />
+          </div>
+
+          {/* NEW */}
+          <div className="space-y-2">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files) {
+                  setProfilePhoto(e.target.files[0])
+                }
+              }}
+              className="w-full text-gray-700 dark:text-gray-300"
+            />
+            {profilePhoto && (
+              <button
+                onClick={handleUploadPhoto}
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+                Upload Photo
+              </button>
+            )}
+          </div>
 
           <div onDoubleClick={handleDoubleClick} className="cursor-pointer p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Username</p>

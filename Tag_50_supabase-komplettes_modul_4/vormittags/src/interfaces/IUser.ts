@@ -6,5 +6,5 @@ export interface IUser {
   lastname: string
   email: string
   password: string
-  img_url?: string
+  img_url: string
 }
