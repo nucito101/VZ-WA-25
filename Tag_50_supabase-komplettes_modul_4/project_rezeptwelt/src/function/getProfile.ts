@@ -7,6 +7,7 @@ export type Profile = {
   first_name: string
   last_name: string
   created_at: string
+  avatar_url?: string
 }
 
 export type Recipe = {

@@ -1,7 +1,23 @@
-export function AvatarCircle({ label }: { label?: string }) {
+type AvatarCircleProps = {
+  label: string
+  src?: string | null
+  size?: number
+  className?: string
+  spanClass?: string
+}
+
+export function AvatarCircle({ label, src, size = 96, className = "", spanClass }: AvatarCircleProps) {
+  const dimension = `${size}px`
   return (
-    <div className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-300 flex items-center justify-center text-white text-4xl font-bold">
-      {label?.[0] || "?"}
+    <div
+      className={`relative rounded-full overflow-hidden bg-neutral-200 flex items-center justify-center text-neutral-700 select-none bg-gradient-to-br from-yellow-400 to-yellow-300 ${className}`}
+      style={{ width: dimension, height: dimension }}
+      aria-label="Profilbild">
+      {src ? (
+        <img src={src} alt="Profilbild" className="w-full h-full object-cover" draggable={false} />
+      ) : (
+        <span className={`text-2xl font-semibold ${spanClass}`}>{label?.toUpperCase()}</span>
+      )}
     </div>
   )
 }

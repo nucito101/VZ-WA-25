@@ -11,6 +11,8 @@ import CreateRecipePage from "./pages/createRecipePage/CreateRecipePage"
 import Login from "./pages/login/Login"
 import SignUp from "./pages/signUp/SignUp"
 import Profile from "./pages/profile/Profile"
+import FavoritesPage from "./pages/favoritesPage/FavoritesPage"
+import RecipeEditPage from "./pages/recipeEditPage/RecipeEditPage"
 
 function App() {
   const router = createBrowserRouter(
@@ -32,6 +34,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/recipes/favorites" element={<FavoritesPage />} />
+        <Route path="/recipe/edit/:id" element={<RecipeEditPage />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     )

@@ -1,3 +1,5 @@
+import type { Profile } from "../function/getProfile"
+
 export interface ICategory {
   id: string
   name: string
@@ -37,6 +39,10 @@ export interface IState {
   }
   loading: boolean
   error: string | null
+  userId: string | null
+  profile: Profile | null
+  authChecked: boolean
+  loadingProfile: boolean
 }
 
 export type TAction =
@@ -48,6 +54,11 @@ export type TAction =
   | { type: "CREATE_RECIPE_START" }
   | { type: "CREATE_RECIPE_SUCCESS"; payload: { recipe: IRecipe; ingredients: IIngredient[] } }
   | { type: "CREATE_RECIPE_ERROR"; payload: string }
+  | { type: "AUTH_SET_USER"; userId: string | null }
+  | { type: "AUTH_CHECKED" }
+  | { type: "PROFILE_LOADING" }
+  | { type: "PROFILE_SET"; profile: Profile | null }
+  | { type: "PROFILE_ERROR"; error: string }
 
 export const initialState: IState = {
   categories: [],
@@ -62,4 +73,8 @@ export const initialState: IState = {
   },
   loading: false,
   error: null,
+  userId: null,
+  profile: null,
+  authChecked: false,
+  loadingProfile: true,
 }

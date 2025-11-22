@@ -1,28 +1,20 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
-import {
-  getAuthUser,
-  getCreatedCount,
-  getCreatedRecipes,
-  getProfileById,
-  updateProfile,
-  type Profile,
-  type Recipe,
-} from "../../function/getProfile"
+import { getCreatedCount, getCreatedRecipes, updateProfile, type Recipe } from "../../function/getProfile"
 import { Alert } from "../../components/alert/Alert"
 import { ProfileHeader } from "../../components/profileheader/ProfileHeader"
 import { ProfileEditForm } from "../../components/profileEditForm/ProfileEditForm"
 import { StatCard } from "../../components/statCard/StatCard"
 import { RecipesGrid } from "../../components/recipesGrid.tsx/RecipesGrid"
+import { useRecipe } from "../../function/getRecipes"
 
 export default function ProfilePage() {
-  const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
+  const { userId, profile, loadingProfile, authChecked, refreshProfile } = useRecipe()
+
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
-
-  const [profile, setProfile] = useState<Profile | null>(null)
-
   const [savedCount] = useState<number>(0)
   const [createdCount, setCreatedCount] = useState<number>(0)
   const [showCreated, setShowCreated] = useState(false)
@@ -30,34 +22,41 @@ export default function ProfilePage() {
   const [recipesLoading, setRecipesLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
 
-  const navigate = useNavigate()
+  useEffect(() => {
+    if (authChecked && !userId) {
+      navigate("/login?redirect=/profile")
+    }
+  }, [authChecked, userId, navigate])
 
   useEffect(() => {
+    if (!userId) return
+    let cancelled = false
+
     ;(async () => {
-      setLoading(true)
-      setError(null)
       try {
-        const user = await getAuthUser()
-        if (!user) {
-          navigate("/login?redirect=/profile")
-          return
-        }
-
-        const [prof, myCount] = await Promise.all([getProfileById(user.id), getCreatedCount(user.id)])
-        setProfile(prof)
+        setError(null)
+        const [myCount, list] = await Promise.all([
+          getCreatedCount(userId),
+          (async () => {
+            setRecipesLoading(true)
+            const r = await getCreatedRecipes(userId)
+            return r
+          })(),
+        ])
+        if (cancelled) return
         setCreatedCount(myCount ?? 0)
-
-        setRecipesLoading(true)
-        const list = await getCreatedRecipes(user.id)
         setRecipes(list)
       } catch (err: any) {
-        setError(err.message ?? "Profil konnte nicht geladen werden.")
+        if (!cancelled) setError(err.message ?? "Profil-Daten konnten nicht geladen werden.")
       } finally {
-        setRecipesLoading(false)
-        setLoading(false)
+        if (!cancelled) setRecipesLoading(false)
       }
     })()
-  }, [navigate])
+
+    return () => {
+      cancelled = true
+    }
+  }, [userId])
 
   const joinedText =
     profile?.created_at &&
@@ -94,7 +93,7 @@ export default function ProfilePage() {
     setMessage(null)
     try {
       await updateProfile(profile.id, { first_name: firstname, last_name: lastname, username })
-      setProfile((p) => (p ? { ...p, first_name: firstname, last_name: lastname, username } : p))
+      await refreshProfile()
       setMessage("Profil gespeichert.")
       setIsEditing(false)
     } catch (err: any) {
@@ -104,7 +103,7 @@ export default function ProfilePage() {
     }
   }
 
-  if (loading) {
+  if (loadingProfile) {
     return (
       <section className="py-16">
         <div className="max-w-4xl mx-auto px-4">
@@ -149,6 +148,12 @@ export default function ProfilePage() {
               setError(null)
               setMessage(null)
             }}
+            avatarPathFromDb={profile.avatar_url}
+            onAvatarUpdated={async () => {
+              // Nach Upload neu laden und eine kleine Erfolgsmeldung zeigen
+              await refreshProfile()
+              setMessage("Profilbild aktualisiert.")
+            }}
           />
 
           {/* Bearbeitungsformular */}
@@ -172,7 +177,7 @@ export default function ProfilePage() {
           <h2 className="mb-8 text-xl font-semibold">Deine Statistiken</h2>
 
           <div className="flex flex-wrap justify-center gap-6">
-            <StatCard value={savedCount} label="Rezepte gespeichert" onClick={() => navigate("/favorites")} />
+            <StatCard value={savedCount} label="Rezepte gespeichert" onClick={() => navigate("/recipes/favorites")} />
             <StatCard
               value={createdCount}
               label="Rezepte erstellt"

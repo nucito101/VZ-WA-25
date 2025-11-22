@@ -1,51 +1,72 @@
-import { createContext, useEffect, useReducer, useState } from "react"
+import { createContext, useEffect, useReducer } from "react"
 import { reducer } from "../function/reducer"
-import { initialState, type IState, type TAction } from "../interfaces/interface"
 import { useLocation, useParams } from "react-router"
 import { getAllRecipes, getCategories, getRecipesByCategory, getRecipeWithIngredients } from "../function/getRecipes"
-import type { User } from "@supabase/supabase-js"
 import supabase from "../utils/supabase"
+import { getProfileById, type Profile } from "../function/getProfile"
+import { initialState, type IState, type TAction } from "../interfaces/interface"
 
 export interface MainContextProps {
   state: IState
   dispatch: React.Dispatch<TAction>
-  user: User | null
-  authChecked: boolean
   linkRecipeToUser: (recipeId: string) => Promise<void>
+
+  userId: string | null
+  profile: Profile | null
+  authChecked: boolean
+  loadingProfile: boolean
+  refreshProfile: () => Promise<void>
 }
 
 export const mainContext = createContext<MainContextProps | null>(null)
 
 export default function MainProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState)
-  const [user, setUser] = useState<User | null>(null)
-  const [authChecked, setAuthChecked] = useState(false)
   const location = useLocation()
   const params = useParams()
 
-  useEffect(() => {
-    const loadUser = async () => {
+  const refreshProfile = async () => {
+    try {
+      dispatch({ type: "PROFILE_LOADING" })
+
       const { data, error } = await supabase.auth.getSession()
       if (error) {
-        console.error("Fehler beim Abrufen der Session:", error.message)
+        dispatch({ type: "PROFILE_ERROR", error: error.message })
+        dispatch({ type: "AUTH_CHECKED" })
+        dispatch({ type: "AUTH_SET_USER", userId: null })
+        return
       }
-      setUser(data.session?.user ?? null)
-      setAuthChecked(true)
+
+      const userId = data.session?.user?.id ?? null
+      dispatch({ type: "AUTH_SET_USER", userId })
+      dispatch({ type: "AUTH_CHECKED" })
+
+      if (!userId) {
+        dispatch({ type: "PROFILE_SET", profile: null })
+        return
+      }
+
+      const profile = await getProfileById(userId)
+      dispatch({ type: "PROFILE_SET", profile })
+    } catch (e: any) {
+      dispatch({ type: "PROFILE_ERROR", error: e?.message ?? "Profil konnte nicht geladen werden" })
     }
-    loadUser()
+  }
+
+  useEffect(() => {
+    refreshProfile()
+
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      const userId = session?.user?.id ?? null
+      dispatch({ type: "AUTH_SET_USER", userId })
+
+      refreshProfile()
     })
+
     return () => {
       listener.subscription.unsubscribe()
     }
   }, [])
-
-  const linkRecipeToUser = async (recipeId: string) => {
-    if (!user) throw new Error("Nicht eingeloggt")
-    const { error } = await supabase.from("user_recipes").insert({ user_id: user.id, recipe_id: recipeId })
-    if (error) throw error
-  }
 
   useEffect(() => {
     const path = location.pathname
@@ -109,10 +130,27 @@ export default function MainProvider({ children }: { children: React.ReactNode }
       }
       return
     }
-  }, [location.pathname, params])
+  }, [location.pathname, params, state.cache.categoriesLoaded, state.categories, dispatch])
+
+  const linkRecipeToUser = async (recipeId: string) => {
+    const userId = state.userId
+    if (!userId) throw new Error("Nicht eingeloggt")
+    const { error } = await supabase.from("user_recipes").insert({ user_id: userId, recipe_id: recipeId })
+    if (error) throw error
+  }
 
   return (
-    <mainContext.Provider value={{ state, dispatch, user, authChecked, linkRecipeToUser }}>
+    <mainContext.Provider
+      value={{
+        state,
+        dispatch,
+        linkRecipeToUser,
+        userId: state.userId,
+        profile: state.profile,
+        authChecked: state.authChecked,
+        loadingProfile: state.loadingProfile,
+        refreshProfile,
+      }}>
       {children}
     </mainContext.Provider>
   )

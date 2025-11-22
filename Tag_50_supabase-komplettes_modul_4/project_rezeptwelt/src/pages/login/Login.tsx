@@ -37,7 +37,7 @@ export default function Login() {
 
   return (
     <section className="mx-auto flex justify-center px-4 py-10 sm:px-6">
-      <FormCard size="small" title="Anmelden" subtitle="Melde dich an, um deine gespeicherten Rezepte zu verwalten.">
+      <FormCard size="sm" title="Anmelden" subtitle="Melde dich an, um deine gespeicherten Rezepte zu verwalten.">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <InputField
             label="E-Mail"

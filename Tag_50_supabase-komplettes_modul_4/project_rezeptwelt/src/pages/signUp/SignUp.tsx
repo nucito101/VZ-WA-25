@@ -2,11 +2,12 @@ import { useState } from "react"
 import supabase from "../../utils/supabase"
 import FormCard from "../../components/formCard/FormCard"
 import InputField from "../../components/inputField/InputField"
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
 
 export default function SignUp() {
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -37,7 +38,7 @@ export default function SignUp() {
       if (error) throw error
 
       setMessage("Konto erstellt! Bitte prüfe deine E-Mails zur Bestätigung.")
-      e.currentTarget.reset()
+      navigate("/profile")
     } catch (err: any) {
       setMessage(err?.message ?? "Registrierung fehlgeschlagen.")
     } finally {

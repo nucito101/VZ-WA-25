@@ -3,7 +3,7 @@ import { Link } from "react-router"
 import { maincontext } from "../../context/MainProvider"
 import type { IUser } from "../../interfaces/IUser"
 import supabase from "../../utils/supabase"
-import { uploadPhoto } from "../../functions/UploadFoto"
+import { uploadPhoto } from "../../functions/uploadFoto"
 
 interface IProfileprops {
   user: IUser | null

@@ -57,6 +57,21 @@ export function reducer(state: IState, action: TAction): IState {
     case "FETCH_ERROR":
       return { ...state, loading: false, error: action.payload }
 
+    case "AUTH_SET_USER":
+      return { ...state, userId: action.userId }
+
+    case "AUTH_CHECKED":
+      return { ...state, authChecked: true }
+
+    case "PROFILE_LOADING":
+      return { ...state, loadingProfile: true, error: null }
+
+    case "PROFILE_SET":
+      return { ...state, profile: action.profile, loadingProfile: false }
+
+    case "PROFILE_ERROR":
+      return { ...state, loadingProfile: false, error: action.error }
+
     default:
       return state
   }
